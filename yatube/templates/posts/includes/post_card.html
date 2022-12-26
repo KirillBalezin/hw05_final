@@ -1,0 +1,11 @@
+<ul>
+  <li>
+    Автор: {{ post.author.get_full_name }}
+  </li>
+  <li>
+    Категория: {{ post.group.title}}
+  </li>
+  <li>
+    Дата публикации: {{ post.pub_date|date:"d E Y" }}
+  </li>
+</ul>

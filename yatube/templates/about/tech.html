@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Технологии{% endblock %}
+{% block content %}
+  <style>
+    ul {
+    padding: 0;
+    margin-left: 20px;
+    }
+  </style>
+  <ul>
+    <div class="row">
+      <h1>Вот что я умею</h1>
+      <aside class="col-12 col-md-3">
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item">
+            Python
+          </li>
+          <li class="list-group-item">
+            Django
+          </li>
+          <li class="list-group-item">
+            SQL
+          </li>
+          <li class="list-group-item">
+            Git
+          </li>
+        </ul>
+      </aside>
+      <article class="col-12 col-md-9">
+        <p>Во время работы над данным проектом было много трудностей...</p>
+        <p>Из самого сложного наверное больше всего выделяется верстка,</p>
+        <p>однако и в других моментах крайне много подводных камней.</p>
+      </article>
+    </div>
+  </ul>
+{% endblock %} 

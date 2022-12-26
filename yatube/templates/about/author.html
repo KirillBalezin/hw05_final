@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Об авторе проекта{% endblock %}
+{% block content %}
+{% load static %}
+  <style>
+    ul {
+    padding: 0;
+    margin-left: 20px;
+    }
+  </style>
+  <ul>
+    <h1>Привет, я автор данного проекта</h1>
+    <div class="row">
+      <aside class="col-12 col-md-3">
+        <p><img src="{% static "img/me.png" %}" width="300px"></p>
+      </aside>
+      <article class="col-12 col-md-9">
+        <p>Меня зовут Кирилл</p>
+        <a href="https://github.com/KirillBalezin">Мой гитхаб</a>
+        <p>Данный проект реализован в рамках образовательной программы Яндекс-Практикума</p>
+      </article>
+    </div>
+    <p>
+    В программирование меня привела дорога приключений после магистратуры в институте, 
+    когда стало понятно, что работать по специальности нет абсолютно никакого желнания.
+    </p>
+  </ul>
+{% endblock %} 
