@@ -17,6 +17,7 @@ class Group(models.Model):
 
 
 class Post(models.Model):
+    TEXT_LENGTH = 15
     text = models.TextField(
         verbose_name='Текст поста',
         help_text='Введите текст поста',
@@ -52,10 +53,11 @@ class Post(models.Model):
         verbose_name_plural = 'Посты'
 
     def __str__(self):
-        return self.text[:15]
+        return self.text[:self.TEXT_LENGTH]
 
 
 class Comment(models.Model):
+    TEXT_LENGTH = 15
     post = models.ForeignKey(
         Post,
         on_delete=models.CASCADE,
@@ -82,7 +84,7 @@ class Comment(models.Model):
         verbose_name_plural = 'Комментарии'
 
     def __str__(self):
-        return self.text[:15]
+        return self.text[:self.TEXT_LENGTH]
 
 
 class Follow(models.Model):

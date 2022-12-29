@@ -7,7 +7,7 @@
     <h1>{{ group }}</h1>
     <p>{{ group.description|linebreaks}}</p>
     {% for post in page_obj %}
-      {% include 'posts/includes/post_list.html' with profile_link_flag=False author_link=True %}
+      {% include 'posts/includes/post.html' with profile_link_flag=False author_link=True %}
     {% endfor %}
       {% include 'posts/includes/paginator.html' %}
   </div>

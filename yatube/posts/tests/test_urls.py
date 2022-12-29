@@ -7,6 +7,7 @@ from ..models import Group, Post, User
 
 INDEX_URL = reverse('posts:index')
 CREATE_POST_URL = reverse('posts:post_create')
+POST_CREATE_REDIRECT = '/auth/login/?next=/create/'
 
 
 class PostURLTest(TestCase):
@@ -24,25 +25,24 @@ class PostURLTest(TestCase):
             author=cls.user,
             text='Тестовый пост'
         )
+        cls.guest_client = Client()
+        cls.authorized_client = Client()
+        cls.authorized_client.force_login(cls.user)
         cls.GROUP_LIST_URL = reverse(
-            'posts:group_list', kwargs={'slug': f'{cls.group.slug}'}
+            'posts:group_list', args=[cls.group.slug]
         )
         cls.PROFILE_URL = reverse(
-            'posts:profile', kwargs={'username': f'{cls.user.username}'})
+            'posts:profile', args=[cls.user.username]
+        )
         cls.POST_DETAIL_URL = reverse(
-            'posts:post_detail', kwargs={'post_id': cls.post.id}
+            'posts:post_detail', args=[cls.post.id]
         )
         cls.POST_EDIT_URL = reverse(
-            'posts:post_edit', kwargs={'post_id': cls.post.id}
+            'posts:post_edit', args=[cls.post.id]
         )
-        cls.POST_CREATE_REDIRECT = '/auth/login/?next=/create/'
         cls.POST_EDIT_REDIRECT = (
-            f'/auth/login/?next=/posts/{cls.post.id}/edit/')
-
-    def setUp(self):
-        self.guest_client = Client()
-        self.authorized_client = Client()
-        self.authorized_client.force_login(self.user)
+            f'/auth/login/?next=/posts/{cls.post.id}/edit/'
+        )
 
     def test_urls_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""
@@ -81,7 +81,7 @@ class PostURLTest(TestCase):
         пользователя на страницу логина.
         """
         pages = {
-            CREATE_POST_URL: self.POST_CREATE_REDIRECT,
+            CREATE_POST_URL: POST_CREATE_REDIRECT,
             self.POST_EDIT_URL: self.POST_EDIT_REDIRECT
         }
         for page, value in pages.items():

@@ -2,10 +2,10 @@ from django.test import TestCase
 
 from ..models import Group, Post, User, Comment
 
-POST_LENGHT = 15
-
 
 class PostModelTest(TestCase):
+    MY_VARIABLE = 15
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -23,7 +23,7 @@ class PostModelTest(TestCase):
     def test_models_have_correct_object_names(self):
         """Проверяем, что у моделей корректно работает __str__."""
         mapping = {
-            self.post.text[:POST_LENGHT]: str(self.post),
+            self.post.text[:self.MY_VARIABLE]: str(self.post),
             self.group.title: str(self.group),
         }
         for expected_object_name, value in mapping.items():
