@@ -71,47 +71,25 @@ class PostViewsTest(TestCase):
         super().tearDownClass()
         shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
 
-    def test_views_index_page_show_correct_context(self):
-        """Шаблон index сформирован с правильным контекстом."""
-        response = self.authorized_client.get(INDEX_URL)
-        group_posts = response.context['page_obj'][0]
-        post_context = {
-            group_posts.text: 'Тестовый пост',
-            group_posts.author: self.user,
-            group_posts.group: self.group,
-            group_posts.image: 'posts/small.gif'
-        }
-        for context, value in post_context.items():
-            with self.subTest(context=context):
-                self.assertEqual(context, value)
-
-    def test_views_group_list_page_show_correct_context(self):
-        """Шаблон group_list сформирован с правильным контекстом."""
-        response = self.authorized_client.get(self.GROUP_LIST_URL)
-        group_posts = response.context['page_obj'][0]
-        group_context = {
-            group_posts.text: 'Тестовый пост',
-            group_posts.author: self.user,
-            group_posts.group: self.group,
-            group_posts.image: 'posts/small.gif'
-        }
-        for context, value in group_context.items():
-            with self.subTest(context=context):
-                self.assertEqual(context, value)
-
-    def test_views_profile_page_show_correct_context(self):
-        """Шаблон profile сформирован с правильным контекстом."""
-        response = self.authorized_client.get(self.PROFILE_URL)
-        group_posts = response.context['page_obj'][0]
-        profile_context = {
-            group_posts.text: 'Тестовый пост',
-            group_posts.author: self.user,
-            group_posts.group: self.group,
-            group_posts.image: 'posts/small.gif'
-        }
-        for context, value in profile_context.items():
-            with self.subTest(context=context):
-                self.assertEqual(context, value)
+    def test_view_pages_show_correct_context(self):
+        """Шаблоны index, group_list и profile
+        сформированы с правильным контекстом."""
+        URLS = (
+            INDEX_URL,
+            self.GROUP_LIST_URL,
+            self.PROFILE_URL,
+        )
+        for url in URLS:
+            response = self.authorized_client.get(url)
+            group_posts = response.context['page_obj'][0]
+            post_context = {
+                group_posts.text: 'Тестовый пост',
+                group_posts.author: self.user,
+                group_posts.group: self.group,
+            }
+            for context, value in post_context.items():
+                with self.subTest(context=context):
+                    self.assertEqual(context, value)
 
     def test_views_post_detail_page_show_correct_context(self):
         """Шаблон post_detail сформирован с правильным контекстом."""
@@ -121,7 +99,6 @@ class PostViewsTest(TestCase):
             response_context.text: 'Тестовый пост',
             response_context.author: self.user,
             response_context.group: self.group,
-            response_context.image: 'posts/small.gif'
         }
         for context, value in post_context.items():
             with self.subTest(context=context):
