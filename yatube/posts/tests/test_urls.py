@@ -1,13 +1,15 @@
-from django.test import TestCase, Client
-from django.urls import reverse
-
 from http import HTTPStatus
+
+from django.test import Client, TestCase
+from django.urls import reverse
 
 from ..models import Group, Post, User
 
 INDEX_URL = reverse('posts:index')
 CREATE_POST_URL = reverse('posts:post_create')
 POST_CREATE_REDIRECT = '/auth/login/?next=/create/'
+FOLLOW_URL = reverse('posts:follow_index')
+NON_EXISTENT_URL = '/unexisting_page/'
 
 
 class PostURLTest(TestCase):
@@ -16,6 +18,7 @@ class PostURLTest(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.user = User.objects.create_user(username='auth')
+        cls.not_author = User.objects.create_user(username='not_author')
         cls.group = Group.objects.create(
             title='Тестовая группа',
             slug='test_slug',
@@ -28,6 +31,8 @@ class PostURLTest(TestCase):
         cls.guest_client = Client()
         cls.authorized_client = Client()
         cls.authorized_client.force_login(cls.user)
+        cls.not_author_client = Client()
+        cls.not_author_client.force_login(cls.not_author)
         cls.GROUP_LIST_URL = reverse(
             'posts:group_list', args=[cls.group.slug]
         )
@@ -53,6 +58,7 @@ class PostURLTest(TestCase):
             self.POST_DETAIL_URL: 'posts/post_detail.html',
             CREATE_POST_URL: 'posts/create_post.html',
             self.POST_EDIT_URL: 'posts/create_post.html',
+            FOLLOW_URL: 'posts/follow.html'
         }
         for address, template in templates_url_names.items():
             with self.subTest(address=address):
@@ -60,41 +66,41 @@ class PostURLTest(TestCase):
                 self.assertTemplateUsed(response, template)
 
     def test_urls_exists_for_anonymus(self):
-        """Страницы доступны любым пользователям."""
-        url = (
-            INDEX_URL,
-            self.GROUP_LIST_URL,
-            self.PROFILE_URL,
-            self.POST_DETAIL_URL,
-        )
-        for adress in url:
-            response = self.guest_client.get(adress)
-            self.assertEqual(response.status_code, HTTPStatus.OK)
-
-    def test_create_for_authorized(self):
-        """Страница /create/ доступна авторизованному пользователю."""
-        response = self.authorized_client.get(CREATE_POST_URL)
-        self.assertEqual(response.status_code, HTTPStatus.OK)
+        """Страницы доступны пользователям."""
+        mapping = {
+            self.guest_client: {
+                INDEX_URL: HTTPStatus.OK,
+                self.GROUP_LIST_URL: HTTPStatus.OK,
+                self.PROFILE_URL: HTTPStatus.OK,
+                self.POST_DETAIL_URL: HTTPStatus.OK,
+                NON_EXISTENT_URL: HTTPStatus.NOT_FOUND
+            },
+            self.authorized_client: {
+                CREATE_POST_URL: HTTPStatus.OK,
+                self.POST_EDIT_URL: HTTPStatus.OK,
+                FOLLOW_URL: HTTPStatus.OK
+            }
+        }
+        for client, urls in mapping.items():
+            for url, status in urls.items():
+                with self.subTest(url=url):
+                    response = client.get(url)
+                    self.assertEqual(response.status_code, status)
 
     def test_create_redirect_anonymous_on_login(self):
-        """Страница по адресу /create/ перенаправит анонимного
-        пользователя на страницу логина.
+        """Страницы правильно перенаправят пользователей.
         """
-        pages = {
-            CREATE_POST_URL: POST_CREATE_REDIRECT,
-            self.POST_EDIT_URL: self.POST_EDIT_REDIRECT
+        mapping = {
+            self.guest_client: {
+                CREATE_POST_URL: POST_CREATE_REDIRECT,
+                self.POST_EDIT_URL: self.POST_EDIT_REDIRECT
+            },
+            self.not_author_client: {
+                self.POST_EDIT_URL: self.POST_DETAIL_URL
+            }
         }
-        for page, value in pages.items():
-            with self.subTest(page=page):
-                response = self.guest_client.get(page)
-                self.assertRedirects(response, value)
-
-    def test_post_edit_for_author(self):
-        """Старница /posts/<post_id>/edit/ доступна автору поста"""
-        response = self.authorized_client.get(self.POST_EDIT_URL)
-        self.assertEqual(response.status_code, HTTPStatus.OK)
-
-    def test_page_404(self):
-        """Запрос к несуществующей странице вернёт ошибку 404."""
-        response = self.guest_client.get('/unexisting_page/')
-        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
+        for client, urls in mapping.items():
+            for page, value in urls.items():
+                with self.subTest(page=page):
+                    response = client.get(page)
+                    self.assertRedirects(response, value)

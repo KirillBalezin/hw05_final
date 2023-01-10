@@ -1,12 +1,12 @@
 import shutil
 import tempfile
+from http import HTTPStatus
 
+from django import forms
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
-
-from http import HTTPStatus
 
 from ..models import Comment, Post, Group, User
 
@@ -152,6 +152,23 @@ class PostFormTests(TestCase):
             with self.subTest(form=form):
                 self.assertEqual(form, value)
 
+    def test_views_create_post_and_post_edit_pages_show_correct_context(self):
+        """Шаблоны post_create и post_edit
+        сформирован с правильным контекстом."""
+        post_context = (
+            CREATE_POST_URL,
+            self.POST_EDIT_URL,
+        )
+        for context in post_context:
+            response = self.authorized_client.get(context)
+            form_fields = {
+                'text': forms.fields.CharField,
+                'group': forms.fields.ChoiceField}
+            for value, expected in form_fields.items():
+                with self.subTest(value=value):
+                    form_field = response.context.get('form').fields.get(value)
+                    self.assertIsInstance(form_field, expected)
+
 
 class CommentFormTests(TestCase):
 
@@ -185,7 +202,7 @@ class CommentFormTests(TestCase):
         self.assertEqual(
             Comment.objects.count(), comments_count + 1
         )
-        comment = Comment.objects.last()
+        comment = Comment.objects.latest('created')
         mapping = {
             comment.author: self.user,
             comment.text: form_data['text'],

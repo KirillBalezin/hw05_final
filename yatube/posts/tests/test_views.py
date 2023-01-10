@@ -6,7 +6,6 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.cache import cache
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
-from django import forms
 
 from ..models import Follow, Post, Group, User
 
@@ -62,9 +61,6 @@ class PostViewsTest(TestCase):
         cls.POST_DETAIL_URL = reverse(
             'posts:post_detail', args=[cls.post.id]
         )
-        cls.POST_EDIT_URL = reverse(
-            'posts:post_edit', args=[cls.post.id]
-        )
 
     @classmethod
     def tearDownClass(cls):
@@ -72,54 +68,28 @@ class PostViewsTest(TestCase):
         shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
 
     def test_view_pages_show_correct_context(self):
-        """Шаблоны index, group_list и profile
+        """Шаблоны index, group_list, profile и post_detail
         сформированы с правильным контекстом."""
         URLS = (
             INDEX_URL,
             self.GROUP_LIST_URL,
             self.PROFILE_URL,
+            self.POST_DETAIL_URL,
         )
         for url in URLS:
             response = self.authorized_client.get(url)
-            group_posts = response.context['page_obj'][0]
+            if url is self.POST_DETAIL_URL:
+                response_context = response.context['post']
+            else:
+                response_context = response.context['page_obj'][0]
             post_context = {
-                group_posts.text: 'Тестовый пост',
-                group_posts.author: self.user,
-                group_posts.group: self.group,
+                response_context.text: 'Тестовый пост',
+                response_context.author: self.user,
+                response_context.group: self.group,
             }
             for context, value in post_context.items():
                 with self.subTest(context=context):
                     self.assertEqual(context, value)
-
-    def test_views_post_detail_page_show_correct_context(self):
-        """Шаблон post_detail сформирован с правильным контекстом."""
-        response = self.authorized_client.get(self.POST_DETAIL_URL)
-        response_context = response.context['post']
-        post_context = {
-            response_context.text: 'Тестовый пост',
-            response_context.author: self.user,
-            response_context.group: self.group,
-        }
-        for context, value in post_context.items():
-            with self.subTest(context=context):
-                self.assertEqual(context, value)
-
-    def test_views_create_post_and_post_edit_pages_show_correct_context(self):
-        """Шаблоны post_create и post_edit
-        сформирован с правильным контекстом."""
-        post_context = (
-            CREATE_POST_URL,
-            self.POST_EDIT_URL,
-        )
-        for context in post_context:
-            response = self.authorized_client.get(context)
-            form_fields = {
-                'text': forms.fields.CharField,
-                'group': forms.fields.ChoiceField}
-            for value, expected in form_fields.items():
-                with self.subTest(value=value):
-                    form_field = response.context.get('form').fields.get(value)
-                    self.assertIsInstance(form_field, expected)
 
     def test_views_post_added_correctly(self):
         """Пост при создании добавлен корректно"""

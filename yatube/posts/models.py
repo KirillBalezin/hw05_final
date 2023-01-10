@@ -5,12 +5,19 @@ User = get_user_model()
 
 
 class Group(models.Model):
-    title = models.CharField(max_length=200)
+    title = models.CharField(
+        max_length=200,
+        verbose_name='Название',
+        help_text='Введите название группы'
+    )
     slug = models.SlugField(
         unique=True,
         db_index=True,
     )
-    description = models.TextField()
+    description = models.TextField(
+        verbose_name='Описание',
+        help_text='Напишите описание группы'
+    )
 
     def __str__(self) -> str:
         return self.title
@@ -89,10 +96,12 @@ class Comment(models.Model):
 
 class Follow(models.Model):
     user = models.ForeignKey(
-        User, related_name='follower', on_delete=models.CASCADE
+        User, related_name='follower', on_delete=models.CASCADE,
+        verbose_name='Пользователь'
     )
     author = models.ForeignKey(
-        User, related_name='following', on_delete=models.CASCADE
+        User, related_name='following', on_delete=models.CASCADE,
+        verbose_name='Автор'
     )
 
     class Meta:
