@@ -4,6 +4,7 @@
 {% block content %}
 {% cache 20 index_page %}
   <div class="container py-5">
+    <h1>Последние обновления на сайте</h1>
     {% include 'posts/includes/switcher.html' with index=True follow=False %}
     {% for post in page_obj %}
       {% include 'posts/includes/post.html' with profile_link_flag=True author_link=True %}
