@@ -3,10 +3,6 @@ from django.test import TestCase
 from ..models import Comment, Follow, Group, Post, User
 
 
-class MyModel():
-    TEXT_LENGTH = 15
-
-
 class PostModelTest(TestCase):
 
     @classmethod
@@ -31,9 +27,9 @@ class PostModelTest(TestCase):
     def test_models_have_correct_object_names(self):
         """Проверяем, что у моделей корректно работает __str__."""
         mapping = {
-            self.post.text[:MyModel.TEXT_LENGTH]: str(self.post),
+            self.post.text[:Post.TEXT_LENGTH]: str(self.post),
             self.group.title: str(self.group),
-            self.comment.text[:MyModel.TEXT_LENGTH]: str(self.comment)
+            self.comment.text[:Comment.TEXT_LENGTH]: str(self.comment)
         }
         for expected_object_name, value in mapping.items():
             with self.subTest(object=object):

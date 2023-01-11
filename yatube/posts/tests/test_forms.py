@@ -14,7 +14,7 @@ TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
 CREATE_POST_URL = reverse('posts:post_create')
 
-small_gif = (
+SMALL_GIF = (
     b'\x47\x49\x46\x38\x39\x61\x02\x00'
     b'\x01\x00\x80\x00\x00\x00\x00\x00'
     b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
@@ -22,9 +22,9 @@ small_gif = (
     b'\x02\x00\x01\x00\x00\x02\x02\x0C'
     b'\x0A\x00\x3B'
 )
-uploaded = SimpleUploadedFile(
+UPLOADED = SimpleUploadedFile(
     name='small.gif',
-    content=small_gif,
+    content=SMALL_GIF,
     content_type='image/gif'
 )
 
@@ -105,7 +105,7 @@ class PostFormTests(TestCase):
             'text': 'Тестовый текст2',
             'group': self.group.id,
             'author': self.user,
-            'image': uploaded
+            'image': UPLOADED
         }
         response = self.authorized_client.post(
             CREATE_POST_URL,
@@ -202,7 +202,7 @@ class CommentFormTests(TestCase):
         self.assertEqual(
             Comment.objects.count(), comments_count + 1
         )
-        comment = Comment.objects.latest('created')
+        comment = Comment.objects.latest('pk')
         mapping = {
             comment.author: self.user,
             comment.text: form_data['text'],
