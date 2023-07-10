@@ -7,7 +7,7 @@ from .utils import paginate
 
 
 def index(request):
-    """Главная страниц."""
+    """Главная страница."""
     return render(
         request, 'posts/index.html',
         {'page_obj': paginate(request, Post.objects.all())}
